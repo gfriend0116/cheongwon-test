@@ -1,0 +1,29 @@
+@charset 'UTF-8';
+ 
+/* 사진첨부 및 게시판 inTable */
+.board_type01_intable { width:100%; margin-bottom:15px; }
+.board_type01_intable th { height:24px; background:#888; color:#fff; border:none; text-align:center;  }
+.board_type01_intable td { height:24px; border-bottom:1px solid #e0e0e0; text-align:center; }
+.board_type01_intable .btn_del, .board_type01_intable .btn_up, .board_type01_intable .btn_down, .board_type01_intable .btn_down2 { background:#222; color:#fff; font-size:11px; padding:5px; letter-spacing:-0.07em; cursor: pointer; display:inline-block }
+
+	 
+	 
+/* 사진첨부 및 게시판 inTable */
+/*.board_type01_intable { width:100%; margin-bottom:15px; }
+	.board_type01_intable th { height:24px; background:#888; color:#fff; border:none; text-align:center;  }
+	.board_type01_intable td { height:24px; border-bottom:1px solid #e0e0e0; text-align:center; }
+	.board_type01_intable .btn_del, .board_type01_intable .btn_up, .board_type01_intable .btn_down { background:#222; color:#fff; font-size:11px; padding:5px; letter-spacing:-0.07em; cursor: pointer; }
+
+일정 POPUP
+.main_calendar_pop { display:none; position:absolute; padding:5px; width:150px; border:1px solid #e0e0e0; z-index:999999; background:#fff; }
+	.main_calendar_pop ul { position:relative; font-size:11px; }
+	.main_calendar_pop ul li { color:#888; }
+	.main_calendar_pop ul li .title { display:block; text-overflow:ellipsis;overflow: hidden;white-space: nowrap; font-weight:bold; padding-bottom:8px; }
+	.main_calendar_pop ul li .cal_txt { display: block;text-overflow:ellipsis;overflow: hidden;white-space: nowrap;}
+	.main_calendar_pop .close_btn { display:block; position:absolute; width:9px; height:9px; top:0px; right:0px; background:url('../images/main_calendar_pop_closebtn.gif') no-repeat; }
+	 */
+	 
+@media screen and (max-width: 480px) {
+.board_type01_intable .btn_down{margin-bottom:4%}
+
+}

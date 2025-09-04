@@ -1,0 +1,15 @@
+$(document).ready(function(){
+	$('#Header .nav a').click(function(){
+		if(!$('.header_wrapper').hasClass('open')){
+			$('.header_wrapper').addClass('open');
+			$('.nav_all').show();
+		}
+	});
+});
+
+function closeNav(){
+	if($('.header_wrapper').hasClass('open')){
+		$('.header_wrapper').removeClass('open');
+		$('.nav_all').hide();
+	}
+}
