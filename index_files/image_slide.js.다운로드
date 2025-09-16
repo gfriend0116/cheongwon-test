@@ -1,0 +1,25 @@
+var slide = null;
+$(document).ready(function(){
+	if($(".main_slide li").length > 1){
+		$('.main_slide').bxSlider({
+			pager: true,
+			controls:true,
+			autoControls:true,
+			auto:true,
+			speed:'3000',
+			pause:'8000'
+		});
+
+	
+		$('.album_slide').bxSlider({
+			pager: false
+		});
+		
+		$('.news_slide').bxSlider({
+			pager: false,
+			controls: false,
+		});
+	}
+	
+	
+}); 

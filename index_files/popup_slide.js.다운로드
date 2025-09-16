@@ -1,0 +1,16 @@
+/*$(document).ready(function(){	
+	$('.popupzone_list').bxSlider({
+		controls: false
+	});
+});
+*/
+var popSlide = null;
+$(document).ready(function(){
+	if(popSlide == null){
+		popSlide = $('.popupzone_list').bxSlider({
+			controls: false,
+			auto: true, 
+			autoControls: true
+		});
+	}
+});

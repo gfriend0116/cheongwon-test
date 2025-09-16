@@ -1,0 +1,133 @@
+
+
+var  strEnc = function(){
+		let today = new Date();   
+		let year = today.getFullYear(); 		// 년도
+		let month = today.getMonth() + 1;  		// 월
+		let date = today.getDate();  			// 날짜
+		let day = today.getDay();  				// 요일
+		return  year + '/' + month + '/' + date + '/';
+}
+
+
+
+function hideLoadingBar() {
+    $('#mask, #loadingImg').hide();
+    $('#mask, #loadingImg').remove();
+}
+
+
+
+
+/////// 파라미터 암호화
+function encode64(str){
+	return encode(escape(str));
+}
+
+function encode642(str){
+	let str2 = inDay()+str;
+	return encode(escape(str2));
+}
+
+function inDay(){
+	let today = new Date();   
+
+	let year = today.getFullYear(); 			// 년도
+	let month = today.getMonth() + 1;  			// 월
+	let date = today.getDate();  				// 날짜
+	let day = today.getDay();  					// 요일
+	let strDate = year +""+ month +""+ date +"/";
+	return strDate ;
+}
+
+ 
+	
+function encode(input){
+	var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+
+	var output = ""
+	var chr1, chr2, chr3;
+	var enc1, enc2, enc3, enc4;
+	var i =0;
+	do{
+			chr1 = input.charCodeAt(i++);
+			chr2 = input.charCodeAt(i++);
+			chr3 = input.charCodeAt(i++);
+			enc1 = chr1 >> 2;
+			enc2 = ((chr1 & 3) << 4) | (chr2 >> 4 );
+			enc3 = ((chr2 & 15) << 2) | (chr3 >> 6 );
+			enc4 = chr3 & 63;
+			if(isNaN(chr2)){
+				enc3 = enc4 =64;
+			}else if(isNaN(chr3)){
+				enc4 = 64;
+			}
+			output = output + keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) + keyStr.charAt(enc4);
+	}while(i<input.length);
+	
+	return output;
+	}
+	
+function charCheck(obj){
+	const regex = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9| |]+$/;
+	if(!regex.test(obj.value)){
+		alert('특수 문자는 입력할 수 없습니다.');
+		return false;
+	}
+	return true;
+}	
+
+
+//필요없음
+function xssUnRepl(str){
+	if (str != '' ){
+        var source = ["&lt;","&gt;","&quot;","&#x27;"];
+        var target = ["<",">",'"',"'"];
+
+		for(var i = 0; i < source.length; i++){
+            str = str.replace(source[i], target[i]);
+        }
+    }
+}
+
+
+function xssFilter(str){
+	if( str.indexOf(">") 			> -1
+		|| str.indexOf("<") 		> -1
+		|| str.indexOf("script") 	> -1
+		|| str.indexOf("alert") 	> -1 			
+	 	|| str.indexOf("iframe") 	> -1
+		|| str.indexOf("oncut") 	> -1 	
+		|| str.indexOf("void") 		> -1 			
+		|| str.indexOf("applet") 	> -1 
+		|| str.indexOf("eval") 		> -1 		
+		|| str.indexOf("innerHTML") > -1 
+		|| str.indexOf("onselectstart") > -1
+		|| str.indexOf("onload") 	> -1 	
+		|| str.indexOf("onerror") 	> -1 		
+		|| str.indexOf("onresize") 	> -1
+		|| str.indexOf("frameset") 	> -1
+		|| str.indexOf("cookie") 	> -1 		
+		|| str.indexOf("onload") 	> -1 
+		|| str.indexOf("style") 	> -1 		
+		|| str.indexOf("layer") 	> -1 			
+		|| str.indexOf("onclick") 	> -1
+		|| str.indexOf("onkeyup") 	> -1	
+		|| str.indexOf("href") 		> -1 		
+		|| str.indexOf("onchange") 	> -1
+		|| str.indexOf("charset") 	> -1 	
+		|| str.indexOf("meta") 		> -1 			
+		|| str.indexOf("onscroll") 	> -1
+		|| str.indexOf("'") 	> -1
+		){ 
+			alert("일부 특수 문자 < > 및 스크립트 문자는 사용 할 수 없습니다. ");
+			return true;
+		}else{
+			return false;
+		}	 
+}
+
+	
+	
+	
+	

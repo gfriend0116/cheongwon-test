@@ -1,0 +1,454 @@
+// https://g.answerny.ai/seoul_edu/chatbot.png
+
+const URL_PREFIX = "https://seouledutalk.sen.go.kr/chatbot/projects/sen";
+// const URL_PREFIX = "http://127.0.0.1:8001";
+const CONFIG = {
+  REDIRECT_URL: `${URL_PREFIX}/seoul.html`, // 팝업 이동 링크수정 사항
+  BTN_IMG_URL: "https://g.answerny.ai/seoul_edu/seoul_edu-min2.gif",
+  CHAT_BOT_URL: `${URL_PREFIX}/chatbot_sen.html`,
+  WISE_PLUGIN: "wisePlugin",
+  PREFIX: "wisenut",
+};
+
+
+const btnStyle = {
+  position: "fixed",
+  bottom: "120px",
+  right: "22px",
+  width: "100px",
+  height: "100px",
+  background: `url(${CONFIG.BTN_IMG_URL}) no-repeat center center`,
+  backgroundSize: "contain",
+  cursor: "pointer",
+  borderRadius: "17px",
+  boxShadow: "3px 3px 5px rgba(0, 0, 0, 0.3)",
+  zIndex: "9999",
+
+};
+
+const crossUrl = `url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='20px' height='20px' viewBox='0 0 20 20' version='1.1'%3E%3Cg id='surface1'%3E%3Cpath style=' stroke:none;fill-rule:evenodd;fill:rgb(25.098039%25,25.098039%25,25.098039%25);fill-opacity:1;' d='M 0 10 C 0 4.476562 4.476562 0 10 0 C 15.523438 0 20 4.476562 20 10 C 20 15.523438 15.523438 20 10 20 C 4.476562 20 0 15.523438 0 10 Z M 0 10 '/%3E%3Cpath style='fill-rule:evenodd;fill:rgb(25.098039%25,25.098039%25,25.098039%25);fill-opacity:1;stroke-width:11.4583;stroke-linecap:round;stroke-linejoin:miter;stroke:rgb(100%25,100%25,100%25);stroke-opacity:1;stroke-miterlimit:8;' d='M 710.495312 109.495312 L 777.917578 176.917578 ' transform='matrix(0.140845,0,0,0.140845,-94.647887,-10)'/%3E%3Cpath style='fill-rule:evenodd;fill:rgb(25.098039%25,25.098039%25,25.098039%25);fill-opacity:1;stroke-width:11.4583;stroke-linecap:round;stroke-linejoin:miter;stroke:rgb(100%25,100%25,100%25);stroke-opacity:1;stroke-miterlimit:8;' d='M 0.00842188 -0.0046875 L 67.430688 67.417578 ' transform='matrix(-0.140845,0,0,0.140845,14.919155,5.422535)'/%3E%3C/g%3E%3C/svg%3E") no-repeat center center`;
+
+const closeBtn = `<button onclick=\"event.stopPropagation(); event.preventDefault(); setCookie(\'seoulEduChat\',\'false\');  this.parentElement.style.display=\'none\';\" title=\"에듀톡 바로가기 닫기\"></button>`;
+
+/*
+const closeBtnStyle = {
+  position: "fixed",
+  right: "15px",
+  bottom: "205px",
+  zIndex: "9999",
+  borderRadius: "40px",
+  width: "20px",
+  height: "20px",
+  borderColor: "gray",
+  background: crossUrl,
+  textAlign: "center",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingLeft: "0px",
+  paddingRight: "0px",
+}*/
+const closeBtnStyle = {
+  position: "fixed",
+  right: "15px",
+  bottom: "205px",
+  zIndex: "9999",
+  borderRadius: "40px",
+  width: "20px",
+  height: "20px",
+  borderColor: "gray",
+  background: crossUrl,
+  textAlign: "center",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingLeft: "0px",
+  paddingRight: "0px",
+//  outline: "none", // 기본 outline 제거 (선택)
+};
+
+
+
+const iframeWrapperStyle = {
+  display: "none",
+  position: "fixed",
+  bottom: `calc(${btnStyle.height} + 60px)`,
+  right: "50px",
+  width: "330px",
+  height: "70%",
+  maxHeight: "600px",
+  borderRadius: "10px",
+  border: "1px solid #f0f0f0",
+};
+
+const iframeStyle = {
+  width: "100%",
+  height: "100%",
+  borderRadius: "inherit",
+  border: "none",
+};
+
+const PLUGIN = {
+  default: `${CONFIG.PREFIX}-plugin`,
+  btn: `${CONFIG.PREFIX}-plugin-btn`,
+  iframeWrapper: `${CONFIG.PREFIX}-plugin-iframe-wrapper`,
+  iframe: `${CONFIG.PREFIX}-plugin-iframe`,
+};
+
+const ATTRIBUTE_NAME = {
+  mode: "data-chat-mode",
+};
+// 추가적으로 CSS를 직접 주입
+const style = document.createElement('style');
+style.innerHTML = `
+  #${PLUGIN.btn} button:focus {
+    outline: 2px solid red; /* 포커스시 테두리 강조 */
+    outline-offset: 2px;
+  }
+`;
+document.head.appendChild(style);
+(function (document) {
+  var currentScript = "currentScript";
+
+  // If browser needs currentScript polyfill, add get currentScript() to the document object
+  if (!(currentScript in document)) {
+    Object.defineProperty(document, currentScript, {
+      get: function () {
+        // IE 8-10 support script readyState
+        // IE 11+ support stack trace
+        try {
+          throw new Error();
+        } catch (err) {
+          // Find the second match for the "at" string to get file src url from stack.
+          // Specifically works with the format of stack traces in IE.
+          var i = 0,
+            stackDetails = /.*at [^(]*\((.*):(.+):(.+)\)$/gi.exec(err.stack),
+            scriptLocation = (stackDetails && stackDetails[1]) || false,
+            line = (stackDetails && stackDetails[2]) || false,
+            currentLocation = document.location.href.replace(
+              document.location.hash,
+              ""
+            ),
+            pageSource,
+            inlineScriptSourceRegExp,
+            inlineScriptSource,
+            scripts = document.getElementsByTagName("script"); // Live NodeList collection
+
+          if (scriptLocation === currentLocation) {
+            pageSource = document.documentElement.outerHTML;
+            inlineScriptSourceRegExp = new RegExp(
+              "(?:[^\\n]+?\\n){0," +
+                (line - 2) +
+                "}[^<]*<script>([\\d\\D]*?)<\\/script>[\\d\\D]*",
+              "i"
+            );
+            inlineScriptSource = pageSource
+              .replace(inlineScriptSourceRegExp, "$1")
+              .trim();
+          }
+
+          for (; i < scripts.length; i++) {
+            // If ready state is interactive, return the script tag
+            if (scripts[i].readyState === "interactive") {
+              return scripts[i];
+            }
+
+            // If src matches, return the script tag
+            if (scripts[i].src === scriptLocation) {
+              return scripts[i];
+            }
+
+            // If inline source matches, return the script tag
+            if (
+              scriptLocation === currentLocation &&
+              scripts[i].innerHTML &&
+              scripts[i].innerHTML.trim() === inlineScriptSource
+            ) {
+              return scripts[i];
+            }
+          }
+
+          // If no match, return null
+          return null;
+        }
+      },
+    });
+  }
+})(document);
+
+/**
+ * data-chat-mode // 기본 채팅 모드 일때 적용
+ */
+
+/**
+ * 채팅모드 ex) 서울시 교육청
+ *  <script src="./js/wise-plugin.js" data-chat-mode="true"></script>
+ */
+
+/**
+ * redirect 모드 ex) 서울시 교육청 제외한 홈페이지
+ * <script src="./js/wise-plugin.js"></script>
+ */
+
+var currentScript = window.document.currentScript;
+
+function getAttribute(e, t) {
+  try {
+    let n = e.getAttribute("data-" + t) || e.getAttribute(t);
+    return (
+      !n &&
+        /([A-Z][a-z]+)/g.test(t) &&
+        ((t = t.replace(/([A-Z][a-z]+)/g, "-$1").toLowerCase()),
+        (n = e.getAttribute(t) || e.getAttribute("data-" + t))),
+      n
+    );
+  } catch (e) {
+    console.log("getAttribute", e);
+  }
+}
+
+function createShadowDom(e) {
+  const t = e.shadowRoot || e.attachShadow({ mode: "open" });
+  return t;
+}
+
+function createElement(id, el) {
+  const e = document.createElement(el ?? "div");
+  return (e.id = id), e;
+}
+
+function setStyle(e, t) {
+  Object.keys(t).forEach(function (n) {
+    e.style[n] = t[n];
+  });
+}
+function redirectPlugin() {
+  const url = new URL(CONFIG.REDIRECT_URL);
+  url.searchParams.append(CONFIG.WISE_PLUGIN, "true");
+  window.open(url, "_blank");
+}
+
+function redirectChatBot() {
+  const url = new URL(CONFIG.CHAT_BOT_URL);
+  const windowReference = window.open(
+    url,
+    "_blank",
+    "width = 400, height = 720, top = 100, left = 200, location = no"
+  );
+  if (!windowReference) {
+    alert("팝업 창이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.");
+  }
+}
+/*
+function createBtn(p, c, isMode) {
+  const e = createElement(PLUGIN.btn);
+  e.setAttribute("tabindex","9999");
+  e.addEventListener("keypress", function (event){event.key === 'Enter' ? isMode ? redirectChatBot() : redirectPlugin() : "" });
+  e.addEventListener("click", function () {
+    if (isMode) {
+      redirectChatBot();
+      return;
+    }
+    redirectPlugin();
+  });
+
+  setStyle(e, btnStyle);
+  e.innerHTML = closeBtn;
+  setStyle(e.children[0],closeBtnStyle);
+  e.children[0].addEventListener('click',function(e){e.stopPropagation();});
+  e.children[0].addEventListener('keypress', function(e){e.key === 'Enter' ? e.stopPropagation() : ""});
+  p.appendChild(e);
+
+  return e;
+}
+*/
+/*
+function createBtn(p, c, isMode) {
+  const e = createElement(PLUGIN.btn);
+  e.setAttribute("tabindex", "9999");
+  e.addEventListener("keypress", function (event) {
+    if (event.key === 'Enter') isMode ? redirectChatBot() : redirectPlugin();
+  });
+  e.addEventListener("click", function () {
+    if (isMode) {
+      redirectChatBot();
+      return;
+    }
+    redirectPlugin();
+  });
+
+  setStyle(e, btnStyle);
+  e.style.background = "none"; // background-image 제거
+
+  // ▶▶▶ 이미지 추가 부분 시작
+  const img = document.createElement('img');
+  img.src = CONFIG.BTN_IMG_URL;
+  img.alt = "궁금할 땐 서울에듀톡!";  // alt 추가
+  img.title = "새 창으로 챗봇 열기"; // title 추가
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "contain";
+  img.style.borderRadius = "17px";
+  e.appendChild(img);
+  // ▶▶▶ 이미지 추가 부분 끝
+
+  e.innerHTML += closeBtn;
+  setStyle(e.children[1], closeBtnStyle); // closeBtn은 img 다음이니까 index 1
+  e.children[1].addEventListener('click', function (e) { e.stopPropagation(); });
+  e.children[1].addEventListener('keypress', function (e) { if (e.key === 'Enter') e.stopPropagation(); });
+
+  p.appendChild(e);
+  
+  // p는 shadowRoot
+  const style = document.createElement('style');
+  style.textContent = `
+    button:focus {
+      outline: 2px solid red !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 4px red !important;
+    }
+  `;
+p.appendChild(style); // document.head 대신 shadow DOM에 삽입
+
+  return e;
+}
+*/
+function createBtn(p, c, isMode) {
+  const e = createElement(PLUGIN.btn);
+//  e.setAttribute("tabindex", "9999");
+
+  e.addEventListener("keypress", function (event) {
+    if (event.key === 'Enter'){		
+      event.preventDefault();  // ✅ click 이벤트 방지
+      event.stopPropagation(); // ✅ 혹시 모를 이벤트 버블 차단
+	    if (isMode) {
+	      redirectChatBot();
+	      return;
+		}
+	    redirectPlugin();
+	}
+  });
+  e.addEventListener("click", function () {
+    if (isMode) {
+      redirectChatBot();
+      return;
+    }
+    redirectPlugin();
+  });
+
+  // ▶▶▶ 이미지 버튼 생성 시작
+  const openBtn = document.createElement("button");
+  openBtn.setAttribute("type", "button");
+  openBtn.setAttribute("title", "새 창으로 챗봇 열기");
+  openBtn.style.width = "100%";
+  openBtn.style.height = "100%";
+  openBtn.style.border = "none";
+  openBtn.style.padding = "0";
+  openBtn.style.margin = "0";
+  openBtn.style.borderRadius = "17px";
+  openBtn.style.background = "none";
+  openBtn.style.cursor = "pointer";
+
+  const img = document.createElement("img");
+  img.src = CONFIG.BTN_IMG_URL;
+  img.alt = "궁금할 땐 서울에듀톡!";
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "contain";
+  img.style.borderRadius = "17px";
+  img.tabIndex = -1;
+
+  openBtn.appendChild(img);
+  // ▶▶▶ 이미지 버튼 생성 끝
+
+  // 버튼 스타일 적용
+  setStyle(e, btnStyle);
+  e.style.background = "none"; // 배경 제거
+
+  e.appendChild(openBtn);
+
+  // 닫기 버튼 추가
+  e.innerHTML += closeBtn;
+  setStyle(e.children[1], closeBtnStyle);
+  e.children[1].addEventListener("click", function (e) {
+    e.stopPropagation();
+  });
+  e.children[1].addEventListener("keypress", function (e) {
+    if (e.key === "Enter") e.stopPropagation();
+  });
+
+  p.appendChild(e);
+
+  // 스타일 주입 (포커스 강조)
+  const style = document.createElement("style");
+  style.textContent = `
+    button:focus {
+      outline: 2px solid red !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 4px red !important;
+    }
+  `;
+  p.appendChild(style);
+
+  return e;
+}
+
+function getMode() {
+  const mode = getAttribute(currentScript, ATTRIBUTE_NAME.mode) ?? "false";
+  return mode === "true" ? true : false;
+}
+
+function initLayout() {
+  if (!document.getElementById(PLUGIN.default)) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const isMode = getMode();
+    let plugin = createElement(PLUGIN.default);
+    let shadow = createShadowDom(plugin);
+    document.body.appendChild(plugin);
+    const isWisePlugin = searchParams.get(CONFIG.WISE_PLUGIN) === "true";
+
+    if (isWisePlugin) {
+      redirectChatBot();
+    }
+
+    //delete searchParams
+    searchParams.delete(CONFIG.WISE_PLUGIN);
+    window.history.replaceState(
+      {},
+      document.title,
+      searchParams.size !== 0 ? `${window.location.pathname}?${searchParams}` : `${window.location.pathname}`
+    );
+
+    createBtn(shadow, shadow.children[0], isMode);
+  }
+}
+
+function dynamicallyLoadScript(url) {
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src = url;
+  document.head.appendChild(script);
+}
+
+
+function getCookie(name) {
+    let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+    return matches ? decodeURIComponent (matches [1]) : null;
+}
+
+
+function setCookie(name,value){
+    let cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + "; path=/";
+    document.cookie = cookie;
+}
+
+
+window.addEventListener('load', function () {
+  
+  let matches = document.cookie.match(new RegExp("(?:^|; )" + 'seoulEduChat'.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+  var cookie =  matches ? decodeURIComponent (matches [1]) : null;
+  
+  if( cookie === null || cookie === undefined){
+    initLayout();
+  }
+})
+
+

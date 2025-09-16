@@ -1,0 +1,88 @@
+
+// 화면 크기 조정
+var nowZoom = 100;
+
+//글자크기 확대 축소
+var fSize = 12;
+var lineHeightChg = 16;
+var moz = 1.00;
+
+//화명을 줄인다.
+function zoomOut() {
+    var checkBrowserKind = CheckBrowserKind();
+    //alert(navigator.appName);
+    if(checkBrowserKind == 'N' || checkBrowserKind == 'F'){
+        moz-= 0.05;
+        if(moz <= 0.7) moz = 0.7;
+        nZooms();
+    }else if(checkBrowserKind == 'O'){
+        moz-= 0.05;
+        if(moz <= 0.7) moz = 0.7;
+        oZooms();
+    }else{
+        nowZoom = nowZoom - 10;
+        if(nowZoom <= 70) nowZoom = 70;
+        zooms();
+    }
+}
+
+//화면을 늘린다.
+function zoomIn() {
+    var checkBrowserKind = CheckBrowserKind();
+    //alert(CheckBrowserKind());
+    if(checkBrowserKind == 'N' || checkBrowserKind == 'F'){
+        moz+= 0.05;
+        if(moz >= 1.5) moz = 1.5;
+        nZooms();
+    }else if(checkBrowserKind == 'O'){
+        moz+= 0.05;
+        if(moz >= 1.5) moz = 1.5;
+        oZooms();
+    }else{
+        nowZoom = nowZoom + 10;
+        if(nowZoom >= 200) nowZoom = 200;
+        zooms();
+    }
+}
+function zoomReset(){
+    nowZoom = 100; 
+    moz = 1.00;
+    
+    var checkBrowserKind = CheckBrowserKind();  
+    if(checkBrowserKind == 'N' || checkBrowserKind == 'F')        
+        nZooms();
+    else if(checkBrowserKind == 'O')        
+        oZooms();
+    else        
+        zooms();    
+}
+
+function zooms(){
+    $("#wrapper_all").css("zoom", nowZoom + "%");
+}
+
+function nZooms(){
+    $("body").css("-moz-transform", "scale("+moz+")");
+    $("body").css("-moz-transform-origin", "0 0");
+}
+
+function oZooms(){
+    $("body").css("-o-transform", "scale("+moz+")");
+    $("body").css("-o-transform-origin", "0 0");
+}
+
+//브라우저 종류를 찾는다.
+function CheckBrowserKind(){
+    var BrowserKind = "I";
+    if (navigator.userAgent.indexOf("Firefox") !=-1)
+        BrowserKind = "F";
+    else if (navigator.userAgent.indexOf("Netscape") !=-1)
+        BrowserKind = "N";
+    else if (navigator.userAgent.indexOf("Opera") !=-1)
+        BrowserKind = "O";
+    else if (navigator.userAgent.indexOf("Chrome") !=-1)
+        BrowserKind = "C";  
+    else if (navigator.userAgent.indexOf("Safari") !=-1)
+        BrowserKind = "S";      
+    return BrowserKind;
+}

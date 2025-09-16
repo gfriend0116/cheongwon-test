@@ -1,0 +1,8 @@
+
+function enterMemberTop(){
+	var f = window.open('https://member.newhosting.ssem.or.kr/dggb/mber/mberSbscrb/mberSbscrbEdit.do?siteId=${sessionScope.SITE_ID}','enterMember','width=910,height=600,scrollbars=yes');
+} 
+
+function modifyMemberTop(){
+	var f = window.open('https://member.newhosting.ssem.or.kr/dggb/mber/mberSbscrb/mberSbscrbEdit.do?siteId=${sessionScope.SITE_ID}&userSeq=${sessionScope.loginVO.userSeq}&siteIdYn=${sessionScope.siteIdYn}','enterMember','width=910,height=600,scrollbars=yes');
+} 
